@@ -5,4 +5,4 @@
 * Paulius Ložys
 * Domantas Gudonis
 * Lukas Devėnas
-* Mykolas (Mikas) Paulauskas
+* Mykolas "Mikas" Paulauskas
