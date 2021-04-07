@@ -72,6 +72,11 @@ namespace FoodApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+
+            //run migrations automatically?
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            context.Database.Migrate();
             CreateRoles(serviceProvider);
         }
         private void CreateRoles(IServiceProvider serviceProvider)
