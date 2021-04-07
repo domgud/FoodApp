@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FoodApp.Data;
 using FoodApp.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FoodApp.Controllers
 {
+    [Authorize]
     public class DishesController : Controller
     {
         private readonly ApplicationDbContext _context;
