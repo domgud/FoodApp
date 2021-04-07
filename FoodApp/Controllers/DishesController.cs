@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace FoodApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrator")]
     public class DishesController : Controller
     {
         private readonly ApplicationDbContext _context;
