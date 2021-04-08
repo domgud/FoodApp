@@ -10,6 +10,7 @@ using FoodApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Vereyon.Web;
 
 namespace FoodApp.Controllers
 {
@@ -18,10 +19,13 @@ namespace FoodApp.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly string userId;
-        public DishesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+        private readonly IFlashMessage _flashMessage;
+        public DishesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, IFlashMessage flashMessage)
         {
             _context = context;
             userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            _flashMessage = flashMessage;
+
         }
 
         // GET: Dishes
@@ -49,6 +53,7 @@ namespace FoodApp.Controllers
                 dish.Restaurant = await _context.Restaurant.FindAsync(userId);
                 _context.Add(dish);
                 await _context.SaveChangesAsync();
+                _flashMessage.Confirmation($"{dish.Name} added successfully!");
                 return RedirectToAction(nameof(Index));
             }
             return View(dish);
@@ -87,6 +92,7 @@ namespace FoodApp.Controllers
                 try
                 {
                     _context.Update(dish);
+                    _flashMessage.Confirmation($"{dish.Name} updated successfully!");
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -131,6 +137,7 @@ namespace FoodApp.Controllers
             var dish = await _context.Dish.FindAsync(id);
             _context.Dish.Remove(dish);
             await _context.SaveChangesAsync();
+            _flashMessage.Confirmation($"{dish.Name} deleted successfully!");
             return RedirectToAction(nameof(Index));
         }
 

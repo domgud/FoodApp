@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Vereyon.Web;
 
 namespace FoodApp
 {
@@ -43,6 +44,7 @@ namespace FoodApp
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddHttpContextAccessor();
+            services.AddFlashMessage();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
