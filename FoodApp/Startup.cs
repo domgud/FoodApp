@@ -1,4 +1,5 @@
 using FoodApp.Data;
+using FoodApp.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,14 +38,15 @@ namespace FoodApp
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
-            })
+            }).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddHttpContextAccessor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -72,6 +74,88 @@ namespace FoodApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+
+            //run migrations automatically?
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            context.Database.Migrate();
+            CreateRoles(serviceProvider);
         }
+        private void CreateRoles(IServiceProvider serviceProvider)
+        {
+
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            Task<IdentityResult> roleResult;
+            //add the roles if they don't exist
+            string[] roleNames = { "Administrator", "Restaurant", "User" };
+            foreach (var roleName in roleNames)
+            {
+                Task<bool> roleExists = roleManager.RoleExistsAsync(roleName);
+                roleExists.Wait();
+
+                if (!roleExists.Result)
+                {
+                    roleResult = roleManager.CreateAsync(new IdentityRole(roleName));
+                    roleResult.Wait();
+                }
+            }
+
+            
+            CreateUser(userManager, "admin@admin", "Administrator");
+            CreateUser(userManager, "user@user", "User");
+            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant", "Pending");
+            CreateRestaurant(userManager, "restaurant2@restaurant2", "Restaurant", "Confirmed");
+            CreateRestaurant(userManager, "restaurant3@restaurant3", "Restaurant", "Pending");
+
+        }
+        private void CreateUser(UserManager<IdentityUser> userManager, string email, string role)
+        {
+            Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
+            testUser.Wait();
+
+            if (testUser.Result == null)
+            {
+                
+                IdentityUser user = new IdentityUser();
+                user.Email = email;
+                user.UserName = email;
+               
+                Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
+                newUser.Wait();
+
+                if (newUser.Result.Succeeded)
+                {
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(user, role);
+                    newUserRole.Wait();
+                }
+            }
+        }
+        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role, string state)
+        {
+            Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
+            testUser.Wait();
+
+            if (testUser.Result == null)
+            {
+
+                Restaurant user = new Restaurant();
+                user.Email = email;
+                user.UserName = email;
+                user.Address = "Kaunas";
+                user.Name = "Liuks";
+                user.State = state;
+
+                Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
+                newUser.Wait();
+
+                if (newUser.Result.Succeeded)
+                {
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(user, role);
+                    newUserRole.Wait();
+                }
+            }
+        }
+
     }
 }

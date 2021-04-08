@@ -14,5 +14,6 @@ namespace FoodApp.Data
         {
         }
         public DbSet<FoodApp.Models.Dish> Dish { get; set; }
+        public DbSet<FoodApp.Models.Restaurant> Restaurant { get; set; }
     }
 }

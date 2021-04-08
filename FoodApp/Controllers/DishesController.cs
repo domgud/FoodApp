@@ -8,42 +8,28 @@ using Microsoft.EntityFrameworkCore;
 using FoodApp.Data;
 using FoodApp.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace FoodApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Restaurant")]
     public class DishesController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public DishesController(ApplicationDbContext context)
+        private readonly string userId;
+        public DishesController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
         // GET: Dishes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Dish.ToListAsync());
+            return View(await _context.Dish.Where(d=>d.Restaurant.Id==userId) .ToListAsync());
         }
 
-        // GET: Dishes/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var dish = await _context.Dish
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (dish == null)
-            {
-                return NotFound();
-            }
-
-            return View(dish);
-        }
 
         // GET: Dishes/Create
         public IActionResult Create()
@@ -60,6 +46,7 @@ namespace FoodApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                dish.Restaurant = await _context.Restaurant.FindAsync(userId);
                 _context.Add(dish);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
