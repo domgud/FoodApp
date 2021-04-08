@@ -14,7 +14,6 @@ namespace FoodApp.Models
         [Required]
         public string Details { get; set; }
         public double Price { get; set; }
-        public int RestaurantId { get; set; }
         public Restaurant Restaurant { get; set; }
 
         public Dish()
