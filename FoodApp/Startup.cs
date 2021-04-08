@@ -1,4 +1,5 @@
 using FoodApp.Data;
+using FoodApp.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -85,7 +86,6 @@ namespace FoodApp
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
             Task<IdentityResult> roleResult;
-            string email = "admin@admin";
             //add the roles if they don't exist
             string[] roleNames = { "Administrator", "Restaurant", "User" };
             foreach (var roleName in roleNames)
@@ -103,25 +103,75 @@ namespace FoodApp
             //Check if the admin user exists and create it if not
             //Add to the Administrator role
 
+            //Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
+            //testUser.Wait();
+
+            //if (testUser.Result == null)
+            //{
+            //    IdentityUser administrator = new IdentityUser();
+            //    administrator.Email = email;
+            //    administrator.UserName = email;
+
+            //    Task<IdentityResult> newUser = userManager.CreateAsync(administrator, "password");
+            //    newUser.Wait();
+
+            //    if (newUser.Result.Succeeded)
+            //    {
+            //        Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(administrator, "Administrator");
+            //        newUserRole.Wait();
+            //    }
+            //}
+            CreateUser(userManager, "admin@admin", "Administrator");
+            CreateUser(userManager, "user@user", "User");
+            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant");
+
+        }
+        private void CreateUser(UserManager<IdentityUser> userManager, string email, string role)
+        {
             Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
             testUser.Wait();
 
             if (testUser.Result == null)
             {
-                IdentityUser administrator = new IdentityUser();
-                administrator.Email = email;
-                administrator.UserName = email;
-
-                Task<IdentityResult> newUser = userManager.CreateAsync(administrator, "password");
+                
+                IdentityUser user = new IdentityUser();
+                user.Email = email;
+                user.UserName = email;
+               
+                Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
                 newUser.Wait();
 
                 if (newUser.Result.Succeeded)
                 {
-                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(administrator, "Administrator");
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(user, role);
                     newUserRole.Wait();
                 }
             }
-
         }
+        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role)
+        {
+            Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
+            testUser.Wait();
+
+            if (testUser.Result == null)
+            {
+
+                Restaurant user = new Restaurant();
+                user.Email = email;
+                user.UserName = email;
+                user.Address = "Kaunas";
+                user.Name = "Liuks";
+
+                Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
+                newUser.Wait();
+
+                if (newUser.Result.Succeeded)
+                {
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(user, role);
+                    newUserRole.Wait();
+                }
+            }
+        }
+
     }
 }
