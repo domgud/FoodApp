@@ -100,30 +100,12 @@ namespace FoodApp
                 }
             }
 
-            //Check if the admin user exists and create it if not
-            //Add to the Administrator role
-
-            //Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
-            //testUser.Wait();
-
-            //if (testUser.Result == null)
-            //{
-            //    IdentityUser administrator = new IdentityUser();
-            //    administrator.Email = email;
-            //    administrator.UserName = email;
-
-            //    Task<IdentityResult> newUser = userManager.CreateAsync(administrator, "password");
-            //    newUser.Wait();
-
-            //    if (newUser.Result.Succeeded)
-            //    {
-            //        Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(administrator, "Administrator");
-            //        newUserRole.Wait();
-            //    }
-            //}
+            
             CreateUser(userManager, "admin@admin", "Administrator");
             CreateUser(userManager, "user@user", "User");
-            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant");
+            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant", "Pending");
+            CreateRestaurant(userManager, "restaurant2@restaurant2", "Restaurant", "Confirmed");
+            CreateRestaurant(userManager, "restaurant3@restaurant3", "Restaurant", "Pending");
 
         }
         private void CreateUser(UserManager<IdentityUser> userManager, string email, string role)
@@ -148,7 +130,7 @@ namespace FoodApp
                 }
             }
         }
-        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role)
+        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role, string state)
         {
             Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
             testUser.Wait();
@@ -161,6 +143,7 @@ namespace FoodApp
                 user.UserName = email;
                 user.Address = "Kaunas";
                 user.Name = "Liuks";
+                user.State = state;
 
                 Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
                 newUser.Wait();
