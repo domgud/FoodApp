@@ -15,5 +15,10 @@ namespace FoodApp.Data
         }
         public DbSet<FoodApp.Models.Dish> Dish { get; set; }
         public DbSet<FoodApp.Models.Restaurant> Restaurant { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Restaurant>().Property(x => x.State).HasConversion<int>();
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

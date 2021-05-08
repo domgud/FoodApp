@@ -9,12 +9,18 @@ namespace FoodApp.Models
 {
     public class Restaurant:IdentityUser
     {
+        public enum RestaurantState
+        {
+            Confirmed,
+            Pending,
+            Blocked
+        }
         [Required]
         public string Name { get; set; }
         [Required]
         public string Address { get; set; }
         [Required]
-        public string State { get; set; }
+        public RestaurantState State { get; set; }
         public double AverageScore { get; set; }
 
         public List<Dish> Dishes { get; set; }

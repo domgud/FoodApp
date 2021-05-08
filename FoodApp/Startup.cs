@@ -146,7 +146,7 @@ namespace FoodApp
                 user.UserName = email;
                 user.Address = "Kaunas";
                 user.Name = "Liuks";
-                user.State = state;
+                user.State = Restaurant.RestaurantState.Pending;
 
                 Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
                 newUser.Wait();
