@@ -16,6 +16,7 @@ namespace FoodApp.Models
         [Required]
         public decimal Price { get; set; }
         public Restaurant Restaurant { get; set; }
+        public ICollection<DishOrder> DishOrders { get; set; }
 
         public Dish()
         {

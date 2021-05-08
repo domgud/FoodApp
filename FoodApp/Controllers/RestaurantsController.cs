@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
@@ -20,12 +21,15 @@ namespace FoodApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IFlashMessage _flashMessage;
         private readonly UserManager<Restaurant> _userManager;
+        private readonly string userId;
+        private object httpContextAccessor;
 
-        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager)
+        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _flashMessage = flashMessage;
             _userManager = userManager;
+            userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RequestList()
@@ -121,6 +125,17 @@ namespace FoodApp.Controllers
             await _userManager.AddToRoleAsync(restaurant, "Restaurant");
             _flashMessage.Confirmation($"Registered successfully! You can login now");
             return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+        public async Task<IActionResult> Orders()
+        {
+            var Orders = await _context.Order
+                .Include(x => x.DishOrders)
+                .ThenInclude(y => y.Dish)
+                .Where(z => z.Restaurant.Id == userId)
+                .ToListAsync();
+            
+            
+            return View();
         }
     }
 }

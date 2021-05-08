@@ -4,14 +4,16 @@ using FoodApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FoodApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210508153639_dish_order_amount")]
+    partial class dish_order_amount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,17 +80,12 @@ namespace FoodApp.Data.Migrations
                     b.Property<double>("DeliveryFee")
                         .HasColumnType("float");
 
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("State")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("RestaurantId");
 
                     b.ToTable("Order");
                 });
@@ -371,10 +368,6 @@ namespace FoodApp.Data.Migrations
                     b.HasOne("FoodApp.Models.Client", "Client")
                         .WithMany("Orders")
                         .HasForeignKey("ClientId");
-
-                    b.HasOne("FoodApp.Models.Restaurant", "Restaurant")
-                        .WithMany()
-                        .HasForeignKey("RestaurantId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
