@@ -9,25 +9,27 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vereyon.Web;
 
+
 namespace FoodApp.Controllers
 {
-    [Authorize(Roles = "Administrator")]
-    public class RequestsController : Controller
+    
+    public class RestaurantsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IFlashMessage _flashMessage;
 
-        public RequestsController(ApplicationDbContext context, IFlashMessage flashMessage)
+        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage)
         {
             _context = context;
             _flashMessage = flashMessage;
         }
-        public async Task<IActionResult> Index()
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> RequestList()
         {
-            return View(await _context.Restaurant.Where(r => r.State==Models.Restaurant.RestaurantState.Pending) .ToListAsync());
+            return View("Index",await _context.Restaurant.Where(r => r.State==Models.Restaurant.RestaurantState.Pending) .ToListAsync());
         }
-
-        public async Task<IActionResult> Details(string id)
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Evaluate(string id)
         {
             if (id == null)
             {
@@ -43,6 +45,7 @@ namespace FoodApp.Controllers
 
             return View(restaurant);
         }
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Confirm(string id)
         {
             if (id == null)
@@ -64,10 +67,10 @@ namespace FoodApp.Controllers
                     _flashMessage.Confirmation($"{restaurant.Name} confirmed successfully!");
                     await _context.SaveChangesAsync();
                 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(RequestList));
             }
             _flashMessage.Danger($"Something went wrong successfully! :(");
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(RequestList));
         }
     }
 }
