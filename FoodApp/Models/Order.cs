@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace FoodApp.Models
             Delivered
         }
         public double DeliveryFee { get; set; }
+        [EnumDataType(typeof(OrderState))]
         public OrderState State { get; set; }
         public Client Client { get; set; }
         public Restaurant Restaurant { get; set; }

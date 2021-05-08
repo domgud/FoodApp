@@ -128,14 +128,66 @@ namespace FoodApp.Controllers
         }
         public async Task<IActionResult> Orders()
         {
-            var Orders = await _context.Order
+            var orders = await _context.Order
                 .Include(x => x.DishOrders)
                 .ThenInclude(y => y.Dish)
                 .Where(z => z.Restaurant.Id == userId)
                 .ToListAsync();
             
             
-            return View();
+            return View(orders);
+        }
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int? id)
+        {
+
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _context.Order.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return View(order);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrderDetails(int id, [Bind("Id,DeliveryFee,State")] Order order)
+        {
+            if (id != order.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(order);
+                    _flashMessage.Confirmation($"Order state updated successfully!");
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!OrderExists(order.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(order);
+        }
+        private bool OrderExists(int id)
+        {
+            return _context.Order.Any(e => e.Id == id);
         }
     }
 }
