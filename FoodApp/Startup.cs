@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vereyon.Web;
+using static FoodApp.Models.Restaurant;
 
 namespace FoodApp
 {
@@ -106,9 +107,9 @@ namespace FoodApp
             
             CreateUser(userManager, "admin@admin", "Administrator");
             CreateUser(userManager, "user@user", "User");
-            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant", "Pending");
-            CreateRestaurant(userManager, "restaurant2@restaurant2", "Restaurant", "Confirmed");
-            CreateRestaurant(userManager, "restaurant3@restaurant3", "Restaurant", "Pending");
+            CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant", RestaurantState.Confirmed);
+            CreateRestaurant(userManager, "restaurant2@restaurant2", "Restaurant", RestaurantState.Pending);
+            CreateRestaurant(userManager, "restaurant3@restaurant3", "Restaurant", RestaurantState.Pending);
 
         }
         private void CreateUser(UserManager<IdentityUser> userManager, string email, string role)
@@ -133,7 +134,7 @@ namespace FoodApp
                 }
             }
         }
-        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role, string state)
+        private void CreateRestaurant(UserManager<IdentityUser> userManager, string email, string role, RestaurantState state)
         {
             Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
             testUser.Wait();
@@ -146,7 +147,7 @@ namespace FoodApp
                 user.UserName = email;
                 user.Address = "Kaunas";
                 user.Name = "Liuks";
-                user.State = Restaurant.RestaurantState.Pending;
+                user.State = state;
 
                 Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
                 newUser.Wait();

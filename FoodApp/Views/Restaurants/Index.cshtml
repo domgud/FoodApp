@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FoodApp.Models.Restaurant>;
+﻿@model IEnumerable<FoodApp.Models.Restaurant>
 
 @{
     ViewData["Title"] = "Index";
@@ -16,30 +16,22 @@
             <th>
                 @Html.DisplayNameFor(model => model.Address)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.State)
-            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Address)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.State)
-                </td>
-                <td>
-
-                    <a asp-action="Evaluate" asp-route-id="@item.Id">Evaluate</a> |
-                </td>
-            </tr>
-        }
+        @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Address)
+            </td>
+            <td>
+                <a asp-action="Menu" asp-route-id="@item.Id">Menu</a> 
+            </td>
+        </tr>
+}
     </tbody>
 </table>

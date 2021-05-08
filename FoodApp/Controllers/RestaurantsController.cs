@@ -26,7 +26,7 @@ namespace FoodApp.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RequestList()
         {
-            return View("Index",await _context.Restaurant.Where(r => r.State==Models.Restaurant.RestaurantState.Pending) .ToListAsync());
+            return View("RequestList",await _context.Restaurant.Where(r => r.State==Models.Restaurant.RestaurantState.Pending) .ToListAsync());
         }
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Evaluate(string id)
@@ -71,6 +71,16 @@ namespace FoodApp.Controllers
             }
             _flashMessage.Danger($"Something went wrong successfully! :(");
             return RedirectToAction(nameof(RequestList));
+        }
+        //restaurants requests stuff above
+        /////////////////////////////////////////////////////////
+        public async Task<IActionResult> Index()
+        {
+            return View(await _context.Restaurant.Where(x => x.State == Models.Restaurant.RestaurantState.Confirmed).ToListAsync());
+        }
+        public async Task<IActionResult> Menu(string id)
+        {
+            return View(await _context.Dish.Where(d => d.Restaurant.Id == id).ToListAsync());
         }
     }
 }
