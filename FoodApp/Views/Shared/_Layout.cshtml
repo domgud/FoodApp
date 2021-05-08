@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity;
+@inject SignInManager<IdentityUser> signInManager;
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -23,13 +25,25 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="Index">Restaurants</a>
+                        </li>
+                        
+                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Restaurant"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Dishes" asp-action="Index">Dishes</a>
+                            </li>
+                        }
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Dishes" asp-action="Index">Dishes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="RequestList">Requests</a>
-                        </li>
+                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="RequestList">Requests</a>
+                            </li>
+
+                        }
+
                     </ul>
                 </div>
             </div>
