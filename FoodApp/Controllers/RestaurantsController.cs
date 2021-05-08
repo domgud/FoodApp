@@ -1,6 +1,8 @@
 ﻿using FoodApp.Data;
+using FoodApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,11 +19,13 @@ namespace FoodApp.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IFlashMessage _flashMessage;
+        private readonly UserManager<Restaurant> _userManager;
 
-        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage)
+        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager)
         {
             _context = context;
             _flashMessage = flashMessage;
+            _userManager = userManager;
         }
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RequestList()
@@ -73,6 +77,7 @@ namespace FoodApp.Controllers
             return RedirectToAction(nameof(RequestList));
         }
         //restaurants requests stuff above
+        //guest stuff below
         /////////////////////////////////////////////////////////
         public async Task<IActionResult> Index()
         {
@@ -81,6 +86,41 @@ namespace FoodApp.Controllers
         public async Task<IActionResult> Menu(string id)
         {
             return View(await _context.Dish.Where(d => d.Restaurant.Id == id).ToListAsync());
+        }
+        //restaurant registration stuff below
+        //////////////////
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register([Bind("Name,Address,Email,Password,ConfirmPassword")] RestaurantRegistrationModel userModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(userModel);
+            }
+            //there are better way to do this, could also use an automapper but oh well :^)
+            Restaurant restaurant = new Restaurant();
+            restaurant.Name = userModel.Name;
+            restaurant.Address = userModel.Address;
+            restaurant.Email = userModel.Email;
+            restaurant.State = Restaurant.RestaurantState.Pending;
+            restaurant.UserName = userModel.Email;
+            var result = await _userManager.CreateAsync(restaurant, userModel.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return View(userModel);
+            }
+            await _userManager.AddToRoleAsync(restaurant, "Restaurant");
+            _flashMessage.Confirmation($"Registered successfully! You can login now");
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
     }
 }
