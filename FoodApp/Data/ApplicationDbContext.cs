@@ -22,6 +22,9 @@ namespace FoodApp.Data
         {
             modelBuilder.Entity<Restaurant>().Property(x => x.State).HasConversion<int>();
             modelBuilder.Entity<Order>().Property(x => x.State).HasConversion<int>();
+            modelBuilder.Entity<Dish>().HasOne<Restaurant>(x => x.Restaurant).WithMany(x => x.Dishes).HasForeignKey(x => x.RestaurantId);
+            modelBuilder.Entity<Order>().HasOne<Client>(x => x.Client).WithMany(x => x.Orders).HasForeignKey(x => x.ClientId);
+            modelBuilder.Entity<Order>().HasOne<Restaurant>(x => x.Restaurant).WithMany(x => x.Orders).HasForeignKey(x => x.RestaurantId);
             modelBuilder.Entity<DishOrder>()
         .HasKey(bc => new { bc.DishId, bc.OrderId });
             modelBuilder.Entity<DishOrder>()

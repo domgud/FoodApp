@@ -22,6 +22,8 @@ namespace FoodApp.Models
         public Client Client { get; set; }
         public Restaurant Restaurant { get; set; }
         public ICollection<DishOrder> DishOrders { get; set; }
+        public string ClientId { get; set; }
+        public string RestaurantId { get; set; }
         public Order()
         {
 

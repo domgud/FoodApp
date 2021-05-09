@@ -22,6 +22,7 @@ namespace FoodApp.Models
         [Required]
         public RestaurantState State { get; set; }
         public double AverageScore { get; set; }
+        public ICollection<Order> Orders { get; set; }
 
         public List<Dish> Dishes { get; set; }
         public Restaurant()
