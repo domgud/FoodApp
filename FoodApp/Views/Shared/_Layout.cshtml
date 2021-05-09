@@ -35,6 +35,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Dishes" asp-action="Index">Dishes</a>
                             </li>
                         }
+                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Restaurant"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="Orders">Orders</a>
+                            </li>
+                        }
 
                         @if (signInManager.IsSignedIn(User) && User.IsInRole("Administrator"))
                         {
