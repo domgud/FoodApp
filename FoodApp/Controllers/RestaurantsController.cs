@@ -11,24 +11,39 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Vereyon.Web;
-
+using Microsoft.AspNetCore.Session;
+using System.Text.Json;
 
 namespace FoodApp.Controllers
 {
-    
+    public static class SessionExtensions
+    {
+        public static void Set<T>(this ISession session, string key, T value)
+        {
+            session.SetString(key, JsonSerializer.Serialize(value));
+        }
+
+        public static T Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default : JsonSerializer.Deserialize<T>(value);
+        }
+    }
+
     public class RestaurantsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IFlashMessage _flashMessage;
         private readonly UserManager<Restaurant> _userManager;
         private readonly string userId;
-        private object httpContextAccessor;
+
 
         public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _flashMessage = flashMessage;
             _userManager = userManager;
+            if (User!=null)
             userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
         [Authorize(Roles = "Administrator")]
@@ -85,10 +100,16 @@ namespace FoodApp.Controllers
         /////////////////////////////////////////////////////////
         public async Task<IActionResult> Index()
         {
+            Dictionary<string, int> stuff = new Dictionary<string, int>();
+            int[] a = { 1, 2, 3, 1, 1 };
+            HttpContext.Session.Set<int[]>("a", a);
             return View(await _context.Restaurant.Where(x => x.State == Models.Restaurant.RestaurantState.Confirmed).ToListAsync());
         }
         public async Task<IActionResult> Menu(string id)
         {
+            var a = HttpContext.Session.Get<int[]>("a");
+            var b = a.Distinct().ToList();
+            var anonymours = b.Select((id, count) => new { id, count = a.Count(x => x == id) });
             return View(await _context.Dish.Where(d => d.Restaurant.Id == id).ToListAsync());
         }
         //restaurant registration stuff below
@@ -189,5 +210,6 @@ namespace FoodApp.Controllers
         {
             return _context.Order.Any(e => e.Id == id);
         }
+
     }
 }

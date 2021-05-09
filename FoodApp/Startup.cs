@@ -55,6 +55,8 @@ namespace FoodApp
             services.AddRazorPages();
             services.AddHttpContextAccessor();
             services.AddFlashMessage();
+            services.AddSession();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,7 +80,7 @@ namespace FoodApp
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -86,7 +88,7 @@ namespace FoodApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
-
+            
 
             //run migrations automatically?
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
