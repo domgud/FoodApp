@@ -98,9 +98,6 @@ namespace FoodApp.Controllers
         /////////////////////////////////////////////////////////
         public async Task<IActionResult> Index()
         {
-            Dictionary<string, int> stuff = new Dictionary<string, int>();
-            int[] a = { 1, 2, 3, 1, 1 };
-            HttpContext.Session.Set<int[]>("a", a);
             return View(await _context.Restaurant.Where(x => x.State == Models.Restaurant.RestaurantState.Confirmed).ToListAsync());
         }
         public async Task<IActionResult> Menu(string id)
@@ -110,21 +107,20 @@ namespace FoodApp.Controllers
                 HttpContext.Session.Set<List<int>>("cart", new List<int>());
                 HttpContext.Session.Set<string>("restaurantId", id);
             }
-            string rId = HttpContext.Session.Get<string>("restaurantId");
-            //var a = HttpContext.Session.Get<int[]>("a");
-            //var b = a.Distinct().ToList();
-            //var anonymours = b.Select((id, count) => new { id, count = a.Count(x => x == id) });
             return View(await _context.Dish.Where(d => d.Restaurant.Id == id).ToListAsync());
         }
         //restaurant registration stuff below
         //////////////////
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register()
         {
+            if (User.Identity.IsAuthenticated) return Redirect("/");
             return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([Bind("Name,Address,Email,Password,ConfirmPassword")] RestaurantRegistrationModel userModel)
         {
             if (!ModelState.IsValid)
@@ -151,6 +147,7 @@ namespace FoodApp.Controllers
             _flashMessage.Confirmation($"Registered successfully! You can login now");
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
+        [Authorize(Roles = "Restaurant")]
         public async Task<IActionResult> Orders()
         {
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -163,6 +160,7 @@ namespace FoodApp.Controllers
             
             return View(orders);
         }
+        [Authorize(Roles = "Restaurant")]
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int? id)
         {
@@ -179,6 +177,7 @@ namespace FoodApp.Controllers
             }
             return View(order);
         }
+        [Authorize(Roles = "Restaurant")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OrderDetails(int id, [Bind("Id,DeliveryFee,State,RestaurantId,ClientId")] Order order)
@@ -207,7 +206,7 @@ namespace FoodApp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Orders));
             }
             return View(order);
         }
@@ -215,24 +214,28 @@ namespace FoodApp.Controllers
         {
             return _context.Order.Any(e => e.Id == id);
         }
+        [Authorize(Roles = "User")]
         public async Task <IActionResult> AddToCart(int id)
         {
 
             List<int> stuff = HttpContext.Session.Get<List<int>>("cart");
             stuff.Add(id);
             HttpContext.Session.Set<List<int>>("cart", stuff);
-            var a = HttpContext.Session.Get<List<int>>("cart");
-            //FIXME fix the redirect
-            return RedirectToAction(nameof(Index));
+            _flashMessage.Confirmation("added to cart successfully!", _context.Dish.FindAsync(id).Result.Name);
+            return Redirect(Request.Headers["Referer"].ToString());
         }
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> Cart()
         {
-            //will need to add some null checks below for extra security
-            //cause stuff can die if the cart is empty
-            List <CartViewModel> cartItems = new List<CartViewModel>();
             var dishIds = HttpContext.Session.Get<List<int>>("cart");
+            if (dishIds is null || dishIds.Count < 1) 
+            {
+                _flashMessage.Warning("Please add items to the cart first");
+                return Redirect(Request.Headers["Referer"].ToString());
+            } 
             var unique = dishIds.Distinct().ToList();
             var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
+            List<CartViewModel> cartItems = new List<CartViewModel>();
             //move this to seperate method when doing distance calculation w google api
             decimal totalPrice = countedDishes.Sum(item => _context.Dish.Find(item.id).Price * item.count);
             foreach (var item in countedDishes)
@@ -242,15 +245,20 @@ namespace FoodApp.Controllers
             }
             return View(cartItems);
         }
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> CartCheckout()
         {
             //this is a horrible implementation cause im doing same calculations twice
             // will need to get back to it later :^);
+
             var dishIds = HttpContext.Session.Get<List<int>>("cart");
+            if (dishIds is null || dishIds.Count < 1) return Redirect("/");
             var unique = dishIds.Distinct().ToList();
             var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
             //move this to seperate method when doing distance calculation w google api
             decimal totalPrice = countedDishes.Sum(item => _context.Dish.Find(item.id).Price * item.count);
+
+            //creating the new order object
             Order order = new Order();
             order.State = Order.OrderState.Paid;
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -258,7 +266,6 @@ namespace FoodApp.Controllers
             order.DeliveryFee = (double)totalPrice;
             Dish dish = await _context.Dish.FindAsync(countedDishes.First().id);
             order.RestaurantId = dish.RestaurantId;
-
             _context.Order.Add(order);
             foreach (var item in countedDishes)
             {
@@ -271,9 +278,12 @@ namespace FoodApp.Controllers
                 _context.DishOrders.Add(dishorder);
             }
             await _context.SaveChangesAsync();
-            //when implementing everything fully flush the session data before return
+            _flashMessage.Confirmation("Food is on the way :^)");
 
-            return RedirectToAction(nameof(Index));
+            //flushing session cart data
+            HttpContext.Session.Set<List<int>>("cart", new List<int>());
+
+            return Redirect("/");
         }
 
 
