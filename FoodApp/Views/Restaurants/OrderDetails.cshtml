@@ -13,6 +13,8 @@
         <form asp-action="OrderDetails">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="RestaurantId" />
+            <input type="hidden" asp-for="ClientId" />
             <div class="form-group">
                 <div class="form-group" style="display:none">
                     <label asp-for="DeliveryFee" class="control-label"></label>

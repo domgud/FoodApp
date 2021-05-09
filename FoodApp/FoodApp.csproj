@@ -14,6 +14,12 @@
     <Compile Remove="Data\Migrations\20210408074342_CreateRestaurantTable.Designer.cs" />
     <Compile Remove="Data\Migrations\20210408074615_CreateRestaurantTable.cs" />
     <Compile Remove="Data\Migrations\20210408074615_CreateRestaurantTable.Designer.cs" />
+    <Compile Remove="Data\Migrations\20210509135348_help-dear-god.cs" />
+    <Compile Remove="Data\Migrations\20210509135348_help-dear-god.Designer.cs" />
+    <Compile Remove="Data\Migrations\20210509135807_help-dear-god.cs" />
+    <Compile Remove="Data\Migrations\20210509135807_help-dear-god.Designer.cs" />
+    <Compile Remove="Data\Migrations\20210509140052_help-dear-god.cs" />
+    <Compile Remove="Data\Migrations\20210509140052_help-dear-god.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

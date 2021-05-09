@@ -35,16 +35,14 @@ namespace FoodApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IFlashMessage _flashMessage;
         private readonly UserManager<Restaurant> _userManager;
-        private readonly string userId;
 
 
-        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager, IHttpContextAccessor httpContextAccessor)
+        public RestaurantsController(ApplicationDbContext context, IFlashMessage flashMessage,UserManager<Restaurant> userManager)
         {
             _context = context;
             _flashMessage = flashMessage;
             _userManager = userManager;
-            if (User!=null)
-            userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
         }
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RequestList()
@@ -155,10 +153,11 @@ namespace FoodApp.Controllers
         }
         public async Task<IActionResult> Orders()
         {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var orders = await _context.Order
                 .Include(x => x.DishOrders)
                 .ThenInclude(y => y.Dish)
-                .Where(z => z.Restaurant.Id == userId)
+                .Where(z => z.RestaurantId == id)
                 .ToListAsync();
             
             
@@ -182,7 +181,7 @@ namespace FoodApp.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> OrderDetails(int id, [Bind("Id,DeliveryFee,State")] Order order)
+        public async Task<IActionResult> OrderDetails(int id, [Bind("Id,DeliveryFee,State,RestaurantId,ClientId")] Order order)
         {
             if (id != order.Id)
             {
@@ -228,12 +227,14 @@ namespace FoodApp.Controllers
         }
         public async Task<IActionResult> Cart()
         {
+            //will need to add some null checks below for extra security
+            //cause stuff can die if the cart is empty
             List <CartViewModel> cartItems = new List<CartViewModel>();
             var dishIds = HttpContext.Session.Get<List<int>>("cart");
             var unique = dishIds.Distinct().ToList();
             var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
             //move this to seperate method when doing distance calculation w google api
-            decimal totalPrice = countedDishes.Sum(item => item.id * item.count);
+            decimal totalPrice = countedDishes.Sum(item => _context.Dish.Find(item.id).Price * item.count);
             foreach (var item in countedDishes)
             {
                 Dish dish = await _context.Dish.FindAsync(item.id);
@@ -241,6 +242,40 @@ namespace FoodApp.Controllers
             }
             return View(cartItems);
         }
+        public async Task<IActionResult> CartCheckout()
+        {
+            //this is a horrible implementation cause im doing same calculations twice
+            // will need to get back to it later :^);
+            var dishIds = HttpContext.Session.Get<List<int>>("cart");
+            var unique = dishIds.Distinct().ToList();
+            var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
+            //move this to seperate method when doing distance calculation w google api
+            decimal totalPrice = countedDishes.Sum(item => _context.Dish.Find(item.id).Price * item.count);
+            Order order = new Order();
+            order.State = Order.OrderState.Paid;
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            order.ClientId = id;
+            order.DeliveryFee = (double)totalPrice;
+            Dish dish = await _context.Dish.FindAsync(countedDishes.First().id);
+            order.RestaurantId = dish.RestaurantId;
+
+            _context.Order.Add(order);
+            foreach (var item in countedDishes)
+            {
+                DishOrder dishorder = new DishOrder();
+                dishorder.Dish = _context.Dish.Find(item.id);
+                dishorder.DishId = item.id;
+                dishorder.order = order;
+                dishorder.OrderId = order.Id;
+                dishorder.Amount = item.count;
+                _context.DishOrders.Add(dishorder);
+            }
+            await _context.SaveChangesAsync();
+            //when implementing everything fully flush the session data before return
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
     }
 }
