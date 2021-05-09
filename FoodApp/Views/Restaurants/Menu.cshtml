@@ -39,7 +39,7 @@
             @if (signInManager.IsSignedIn(User) && User.IsInRole("User"))
             {
                 <td>
-                    <button type="button">Add to cart (good luck :^))!</button>
+                    <a asp-action="AddToCart" asp-route-id="@item.Id">Add to cart</a>
 
                 </td>
             }
