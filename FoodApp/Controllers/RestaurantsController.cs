@@ -107,9 +107,15 @@ namespace FoodApp.Controllers
         }
         public async Task<IActionResult> Menu(string id)
         {
-            var a = HttpContext.Session.Get<int[]>("a");
-            var b = a.Distinct().ToList();
-            var anonymours = b.Select((id, count) => new { id, count = a.Count(x => x == id) });
+            if (HttpContext.Session.Get<string>("restaurantId") != id) 
+            {
+                HttpContext.Session.Set<List<int>>("cart", new List<int>());
+                HttpContext.Session.Set<string>("restaurantId", id);
+            }
+            string rId = HttpContext.Session.Get<string>("restaurantId");
+            //var a = HttpContext.Session.Get<int[]>("a");
+            //var b = a.Distinct().ToList();
+            //var anonymours = b.Select((id, count) => new { id, count = a.Count(x => x == id) });
             return View(await _context.Dish.Where(d => d.Restaurant.Id == id).ToListAsync());
         }
         //restaurant registration stuff below
@@ -209,6 +215,31 @@ namespace FoodApp.Controllers
         private bool OrderExists(int id)
         {
             return _context.Order.Any(e => e.Id == id);
+        }
+        public async Task <IActionResult> AddToCart(int id)
+        {
+
+            List<int> stuff = HttpContext.Session.Get<List<int>>("cart");
+            stuff.Add(id);
+            HttpContext.Session.Set<List<int>>("cart", stuff);
+            var a = HttpContext.Session.Get<List<int>>("cart");
+            //FIXME fix the redirect
+            return RedirectToAction(nameof(Index));
+        }
+        public async Task<IActionResult> Cart()
+        {
+            List <CartViewModel> cartItems = new List<CartViewModel>();
+            var dishIds = HttpContext.Session.Get<List<int>>("cart");
+            var unique = dishIds.Distinct().ToList();
+            var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
+            //move this to seperate method when doing distance calculation w google api
+            decimal totalPrice = countedDishes.Sum(item => item.id * item.count);
+            foreach (var item in countedDishes)
+            {
+                Dish dish = await _context.Dish.FindAsync(item.id);
+                cartItems.Add(new CartViewModel(dish, dish.Price * item.count, item.count, totalPrice));
+            }
+            return View(cartItems);
         }
 
     }
