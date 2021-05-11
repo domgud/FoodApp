@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="~/css/site.css" />
     @addTagHelper *, Vereyon.Web.FlashMessage
 </head>
-<body>
+<body style="background: linear-gradient(241deg, rgba(251,217,63,1) 38%, rgba(251,217,63,1) 63%, rgba(252,70,107,1) 100%);">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav id="navBar" class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FoodApp</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -23,36 +23,36 @@
                     <partial name="_LoginPartial" />
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="Index">Restaurants</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Restaurants" asp-action="Index">Restaurants</a>
                         </li>
 
                         @if (signInManager.IsSignedIn(User) && User.IsInRole("Restaurant"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Dishes" asp-action="Index">Dishes</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Dishes" asp-action="Index">Dishes</a>
                             </li>
                         }
                         @if (signInManager.IsSignedIn(User) && User.IsInRole("Restaurant"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="Orders">Orders</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Restaurants" asp-action="Orders">Orders</a>
                             </li>
                         }
 
                         @if (signInManager.IsSignedIn(User) && User.IsInRole("Administrator"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="RequestList">Requests</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Restaurants" asp-action="RequestList">Requests</a>
                             </li>
 
                         }
                         @if (!signInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Restaurants" asp-action="Register">Register restaurant</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Restaurants" asp-action="Register">Register restaurant</a>
                             </li>
 
                         }
