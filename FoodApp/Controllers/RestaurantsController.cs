@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Vereyon.Web;
 using Microsoft.AspNetCore.Session;
 using System.Text.Json;
-using FoodApp.Extensions;
+using FoodApp.Helpers;
 
 namespace FoodApp.Controllers
 {
@@ -221,10 +221,17 @@ namespace FoodApp.Controllers
             {
                 _flashMessage.Warning("Please add items to the cart first");
                 return Redirect(Request.Headers["Referer"].ToString());
-            } 
+            }
+            
             var unique = dishIds.Distinct().ToList();
             var countedDishes = unique.Select((id, count) => new { id, count = dishIds.Count(x => x == id) });
             List<CartViewModel> cartItems = new List<CartViewModel>();
+            //communicating with the api :^)
+            string restaurant = _context.Restaurant.FindAsync(_context.Dish.Find(dishIds.First()).RestaurantId).Result.Address;
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string client = _context.Client.FindAsync(id).Result.Address;
+            var DistanceProcessor = new DistanceProcessor();
+            var distance = await DistanceProcessor.LoadDistance(client, restaurant);
             //move this to seperate method when doing distance calculation w google api
             decimal totalPrice = countedDishes.Sum(item => _context.Dish.Find(item.id).Price * item.count);
             foreach (var item in countedDishes)

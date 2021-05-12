@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace FoodApp.Extensions
+namespace FoodApp.Helpers
 {
     public static class SessionExtensions
     {

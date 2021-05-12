@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vereyon.Web;
+using FoodApp.Helpers;
 using static FoodApp.Models.Restaurant;
 
 namespace FoodApp
@@ -94,6 +95,7 @@ namespace FoodApp
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
             context.Database.Migrate();
             CreateRoles(serviceProvider);
+            APIHelper.InitializeClient();
         }
         private void CreateRoles(IServiceProvider serviceProvider)
         {
