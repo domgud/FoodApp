@@ -19,8 +19,6 @@ namespace FoodApp.Controllers
         {
             _context = context;
             _flashMessage = flashMessage;
-
-
         }
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> RequestList()
