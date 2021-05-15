@@ -24,6 +24,7 @@ namespace FoodApp.Models
         public ICollection<DishOrder> DishOrders { get; set; }
         public string ClientId { get; set; }
         public string RestaurantId { get; set; }
+        public Rate Rate { get; set; }
         public Order()
         {
 
