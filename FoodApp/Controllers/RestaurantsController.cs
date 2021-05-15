@@ -160,8 +160,10 @@ namespace FoodApp.Controllers
             {
                 return NotFound();
             }
-
-            var order = await _context.Order.FindAsync(id);
+            //need to do this cause otherwise lazy loading happens and we have a null
+            var order = await _context.Order.Include(x => x.DishOrders)
+                .ThenInclude(y => y.Dish)
+                .Where(z => z.Id == id).FirstAsync();
             if (order == null)
             {
                 return NotFound();

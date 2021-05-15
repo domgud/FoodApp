@@ -8,36 +8,65 @@
 
 <h4>Order</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="OrderDetails">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="RestaurantId" />
-            <input type="hidden" asp-for="ClientId" />
-            <div class="form-group">
-                <div class="form-group" style="display:none">
-                    <label asp-for="DeliveryFee" class="control-label"></label>
-                    <input asp-for="DeliveryFee" class="form-control" />
-                    <span asp-validation-for="DeliveryFee" class="text-danger"></span>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Dish name
+            </th>
+            <th>
+                Amount
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.DishOrders)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Dish.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="OrderDetails">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="RestaurantId" />
+                <input type="hidden" asp-for="ClientId" />
+                <div class="form-group">
+                    <div class="form-group" style="display:none">
+                        <label asp-for="DeliveryFee" class="control-label"></label>
+                        <input asp-for="DeliveryFee" class="form-control" />
+                        <span asp-validation-for="DeliveryFee" class="text-danger"></span>
+                    </div>
+                    <label asp-for="State" class="control-label"></label>
+                    <select asp-for="State" asp-items="Html.GetEnumSelectList<Order.OrderState>()" class="form-control">
+                    </select>
+
+                    <span asp-validation-for="State" class="text-danger"></span>
                 </div>
-                <label asp-for="State" class="control-label"></label>
-                <select asp-for="State" asp-items="Html.GetEnumSelectList<Order.OrderState>()" class="form-control">
-                </select>
-
-                <span asp-validation-for="State" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Orders">Back to List</a>
-</div>
+    <div>
+        <a asp-action="Orders">Back to List</a>
+    </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
