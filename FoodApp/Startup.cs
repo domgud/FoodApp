@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vereyon.Web;
+using FoodApp.Helpers;
 using static FoodApp.Models.Restaurant;
 
 namespace FoodApp
@@ -94,6 +95,7 @@ namespace FoodApp
             var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
             context.Database.Migrate();
             CreateRoles(serviceProvider);
+            APIHelper.InitializeClient();
         }
         private void CreateRoles(IServiceProvider serviceProvider)
         {
@@ -117,7 +119,7 @@ namespace FoodApp
 
             
             CreateUser(userManager, "admin@admin", "Administrator");
-            CreateUser(userManager, "user@user", "User");
+            CreateClient(userManager, "user@user", "User");
             CreateRestaurant(userManager, "restaurant@restaurant", "Restaurant", RestaurantState.Confirmed);
             CreateRestaurant(userManager, "restaurant2@restaurant2", "Restaurant", RestaurantState.Pending);
             CreateRestaurant(userManager, "restaurant3@restaurant3", "Restaurant", RestaurantState.Pending);
@@ -135,6 +137,30 @@ namespace FoodApp
                 user.Email = email;
                 user.UserName = email;
                
+                Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
+                newUser.Wait();
+
+                if (newUser.Result.Succeeded)
+                {
+                    Task<IdentityResult> newUserRole = userManager.AddToRoleAsync(user, role);
+                    newUserRole.Wait();
+                }
+            }
+        }
+        private void CreateClient(UserManager<IdentityUser> userManager, string email, string role)
+        {
+            Task<IdentityUser> testUser = userManager.FindByEmailAsync(email);
+            testUser.Wait();
+
+            if (testUser.Result == null)
+            {
+
+                Client user = new Client();
+                user.Email = email;
+                user.UserName = email;
+                user.Address = "Kaunas, Studentu g. 71";
+                user.Name = "Petras";
+
                 Task<IdentityResult> newUser = userManager.CreateAsync(user, "password");
                 newUser.Wait();
 

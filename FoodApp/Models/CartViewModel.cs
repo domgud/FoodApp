@@ -11,12 +11,14 @@ namespace FoodApp.Models
         public decimal TotalPrice { get; set; }
         public int ItemCount { get; set; }
         public decimal CartPrice { get; set; }
-        public CartViewModel(Dish dish, decimal price, int item, decimal cart)
+        public decimal DeliveryFee { get; set; }
+        public CartViewModel(Dish dish, decimal price, int item, decimal cart, decimal deliveryfee)
         {
             Dish = dish;
             TotalPrice = price;
             ItemCount = item;
             CartPrice = cart;
+            DeliveryFee = deliveryfee;
         }
         public CartViewModel()
         {
